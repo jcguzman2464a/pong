@@ -30,7 +30,6 @@ function preload() {
 }
 
 
-
 function setup() {
   createCanvas(800, 400);
   pelota = new Pelota(400, 200, 30, 5, 5);
@@ -63,7 +62,7 @@ function iniciarJuego() {
   nivelDificultad = menuDificultad.value(); // Obtener dificultad seleccionada
   juegoIniciado = true;
   setTimeout(() => {
-    let Inicio = `Esta gran Emputadora ha encontrado a ${nombreJugador} que sera victima de mi gran poder deprocesamiento, !JAJAJA  JAJAJA¡`;
+    let Inicio = `Esta gran Enputadora ha encontrado a ${nombreJugador} el cual sera victima de mi gran poder deprocesamiento, !JAJAJA  JAJAJA¡`;
     let mensajeInicio = new SpeechSynthesisUtterance(Inicio);
     mensajeInicio.lang = 'es-MX';    
     speechSynthesis.speak(mensajeInicio);
@@ -73,7 +72,7 @@ function iniciarJuego() {
 }
 
 function narrarPuntos() {
-  let puntos = `Jugador ${nombreJugador} ${puntosJugador} - Computadora ${puntosComputadora}`;
+  let puntos = `Jugador ${nombreJugador} ${puntosJugador} - Enputadora ${puntosComputadora}`;
   let ganador = `¡Felicidades, ${nombreJugador}! Has vencido a esta Gran Emputadora por ${puntosJugador - puntosComputadora} puntos, Pero tu suerte no durara por siempre.  ¿Te atreves a jugar de nuevo?`;
   let perdedor = `Lo siento mucho, ${nombreJugador}. Yo la Maravillosa Emputadora te he dado una reverenda paliza por ${puntosComputadora - puntosJugador} puntos,  Te Pregubto:  ¿tienes las agallas para jugar de nuevo?.`;
 
@@ -140,7 +139,7 @@ function draw() {
   fill(255);
   textAlign(CENTER, CENTER); // Centrar el texto
   text(nombreJugador + ": " + puntosJugador, width / 4, 50);
-  text("Emputadora: " + puntosComputadora, 3 * width / 4, 50);
+  text("Enputadora: " + puntosComputadora, 3 * width / 4, 50);
 }
 
 function keyPressed() {
@@ -261,9 +260,20 @@ class Raqueta {
   }
 
   update() {
+    if (juegoIniciado) { // Solo responder al mouse si el juego ha iniciado
+      this.y = mouseY - this.alto / 2; // Centrar la raqueta en el mouse
+      this.y = constrain(this.y, 0, height - this.alto); // Mantener la raqueta dentro del lienzo
+    } else {
+      this.y += this.direccion * this.velocidad; // Movimiento con flechas (si el juego no ha iniciado)
+      this.y = constrain(this.y, 0, height - this.alto);
+    }
+
+    
     this.y += this.direccion * this.velocidad;
     this.y = constrain(this.y, 0, height - this.alto);
   }
+
+  
 
   draw() {
     if (this === raquetaJugador) {
@@ -302,5 +312,20 @@ class Raqueta {
     } else {
       this.direccion = 0;
     }
+  }
+
+}
+
+function touchStarted() {
+  if (juegoIniciado) {
+    raquetaJugador.y = touchY - raquetaJugador.alto / 2; // Ajustar posición al tocar la pantalla
+    raquetaJugador.y = constrain(raquetaJugador.y, 0, height - raquetaJugador.alto);
+  }
+}
+
+function touchMoved() {
+  if (juegoIniciado) {
+    raquetaJugador.y = touchY - raquetaJugador.alto / 2; // Seguir el dedo en la pantalla
+    raquetaJugador.y = constrain(raquetaJugador.y, 0, height - raquetaJugador.alto);
   }
 }
