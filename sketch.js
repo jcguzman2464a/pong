@@ -31,7 +31,7 @@ function preload() {
 
 
 function setup() {
-  createCanvas(800, 400);
+  createCanvas(windowWidth, windowHeight); // Lienzo responsive
   pelota = new Pelota(400, 200, 30, 5, 5);
   raquetaJugador = new Raqueta(5, height / 2 - 50, 20, 100, 5);
   raquetaComputadora = new Raqueta(width - 25, height / 2 - 50, 20, 100, 5);
@@ -260,17 +260,21 @@ class Raqueta {
   }
 
   update() {
-    if (juegoIniciado) { // Solo responder al mouse si el juego ha iniciado
-      this.y = mouseY - this.alto / 2; // Centrar la raqueta en el mouse
-      this.y = constrain(this.y, 0, height - this.alto); // Mantener la raqueta dentro del lienzo
-    } else {
-      this.y += this.direccion * this.velocidad; // Movimiento con flechas (si el juego no ha iniciado)
-      this.y = constrain(this.y, 0, height - this.alto);
+    if (this === raquetaJugador) { // Si es la raqueta del jugador
+      if (juegoIniciado) {
+        this.y = mouseY - this.alto / 2; // Control con el mouse si el juego ha iniciado
+        this.y = constrain(this.y, 0, height - this.alto);
+      } else {
+        this.y += this.direccion * this.velocidad; // Control con flechas si el juego no ha iniciado
+        this.y = constrain(this.y, 0, height - this.alto);
+      }
+    } else { // Si es la raqueta de la computadora
+      if (juegoIniciado) {
+        this.seguirPelota(pelota); // La computadora sigue la pelota si el juego ha iniciado
+        this.y += this.direccion * this.velocidad; // Se mueve según la dirección calculada
+        this.y = constrain(this.y, 0, height - this.alto);
+      }
     }
-
-    
-    this.y += this.direccion * this.velocidad;
-    this.y = constrain(this.y, 0, height - this.alto);
   }
 
   
@@ -288,22 +292,26 @@ class Raqueta {
   }
 
   seguirPelota(pelota) {
-    let velocidadReaccion = 0; // Velocidad de reacción de la IA
+    let velocidadReaccion = 0;
+    let prediccionX = pelota.x + pelota.vx * 10; // Predicción de 10 frames
+    let prediccionY = pelota.y + pelota.vy * 10;
+
+    // Ajustar predicción si la pelota va a rebotar en la pared
+    if (prediccionY + pelota.diametro / 2 > height || prediccionY - pelota.diametro / 2 < 0) {
+      prediccionY = height - (prediccionY + pelota.diametro / 2) - pelota.diametro; // Rebote en la pared
+    }
 
     switch (nivelDificultad) {
       case "fácil":
-        velocidadReaccion = 0.5; // Reacciona más lento
+        velocidadReaccion = 0.3;
         break;
       case "normal":
-        velocidadReaccion = 1; // Velocidad de reacción normal
+        velocidadReaccion = 0.7;
         break;
       case "demonio":
-        velocidadReaccion = 1.5; // Reacciona más rápido
+        velocidadReaccion = 1.2;
         break;
     }
-
-    // Anticipar la trayectoria de la pelota (más inteligente)
-    let prediccionY = pelota.y + pelota.vy * 5; // Predicción simple
 
     if (prediccionY < this.y + this.alto / 2) {
       this.direccion = -1 * velocidadReaccion;
